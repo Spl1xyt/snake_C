@@ -9,8 +9,8 @@
 #define MAX_LENGTH (BOARD_SIZE * BOARD_SIZE)
 
 typedef struct {
-    int x;
-    int y;
+  int x;
+  int y;
 } segment;
 
 void sleep_ms(int milliseconds) {
@@ -25,13 +25,13 @@ void gameBoard(int appleX, int appleY, segment snake[], int *snakeLength)
 	clear();
 	int board[BOARD_SIZE][BOARD_SIZE * 2] = {0};
 
-    for (int i = 0; i < *snakeLength; i++) {
-        if (i == 0)
-            board[snake[i].x][snake[i].y] = 3;
-        else {
-            board[snake[i].x][snake[i].y] = 4;
-        }
+  for (int i = 0; i < *snakeLength; i++) {
+    if (i == 0)
+      board[snake[i].x][snake[i].y] = 3;
+    else {
+      board[snake[i].x][snake[i].y] = 4;
     }
+  }
 
 	for (int i = 0; i < BOARD_SIZE * 2; i++) {
 		board[0][i] = 1;
@@ -48,17 +48,16 @@ void gameBoard(int appleX, int appleY, segment snake[], int *snakeLength)
 	for (int i = 0; i < BOARD_SIZE; i++) {
 		for (int j = 0 ; j < BOARD_SIZE * 2; j++)
 			if (board[i][j] == 0) {
-                mvprintw(i, j, " ");
-            } else if (board[i][j] == 1) {
-                mvprintw(i, j, "#");
-            } else if (board[i][j] == 2) {
-                mvprintw(i, j, "O");
-            } else if (board[i][j] == 3) {
-                mvprintw(i, j, "$");
-            } else if (board[i][j] == 4) {
-                mvprintw(i, j, "*");
-            }
-		
+        mvprintw(i, j, " ");
+      } else if (board[i][j] == 1) {
+        mvprintw(i, j, "#");
+      } else if (board[i][j] == 2) {
+        mvprintw(i, j, "O");
+      } else if (board[i][j] == 3) {
+        mvprintw(i, j, "$");
+      } else if (board[i][j] == 4) {
+        mvprintw(i, j, "*");
+			}
 		printf("\n");
 	}
 }
@@ -69,94 +68,109 @@ int newApple(int *appleX, int *appleY)
     *appleY = rand() % 29;
 	if (*appleX == 0)
 		(*appleX)++;
-    else if (*appleY == 0)
-        (*appleY)++;
+  else if (*appleY == 0)
+    (*appleY)++;
+}
+
+int checkAppleEat(int *appleX, int *appleY, int *snakeLength, segment snake[])
+{
+	if (snake[0].x == *appleY && snake[0].y == *appleX) {
+  	(*snakeLength)++;
+		return true;
+  } else {
+		return false;
+	}
 }
 
 void updateSnakePosition(int direction, segment snake[], int *snakeLength) {
-    for (int i = *snakeLength - 1; i > 0; i--) {
-        snake[i] = snake[i - 1];
-    }
+  for (int i = *snakeLength - 1; i > 0; i--) {
+    snake[i] = snake[i - 1];
+  }
 
-    switch (direction) {
-        case 0:
-            snake[0].x--;
-            break;
-        case 1:
-            snake[0].y++;
-            break;
-        case 2:
-            snake[0].x++;
-            break;
-        case 3:
-            snake[0].y--;
-            break;
+  switch (direction) {
+    case 0:
+      snake[0].x--;
+      break;
+    case 1:
+      snake[0].y++;
+      break;
+    case 2:
+      snake[0].x++;
+      break;
+    case 3:
+      snake[0].y--;
+      break;
     }
 }
 
 int snakeDirection(int currentDirection) {
-    int ch = getch();
-    switch (ch) {
-        case KEY_UP:
-            if (currentDirection != 2) return 0;
-            break;
-        case KEY_RIGHT:
-            if (currentDirection != 3) return 1;
-            break;
-        case KEY_DOWN:
-            if (currentDirection != 0) return 2;
-            break;
-        case KEY_LEFT:
-            if (currentDirection != 1) return 3;
-            break;
-    }
-    return currentDirection; 
+  int ch = getch();
+  switch (ch) {
+    case KEY_UP:
+      if (currentDirection != 2) return 0;
+        break;
+    case KEY_RIGHT:
+      if (currentDirection != 3) return 1;
+        break;
+    case KEY_DOWN:
+      if (currentDirection != 0) return 2;
+        break;
+    case KEY_LEFT:
+      if (currentDirection != 1) return 3;
+      	break;
+  }
+  return currentDirection; 
+}
+
+int checkGameOver(segment snake[], int *snakeLength, bool *gameOver)
+{
+  if (snake[0].x == BOARD_SIZE - 1 || snake[0].x == 0 || snake[0].y == (BOARD_SIZE * 2) - 1 || snake[0].y == 0)
+    *gameOver = true;
+
+  for (int i = 1; i < *snakeLength; i++) {
+    if (snake[0].x == snake[i].x && snake[0].y == snake[i].y)
+      *gameOver = true;
+  }
 }
 
 int main(void) {
-    srand(time(NULL));
-    int appleX, appleY;
-    newApple(&appleX, &appleY);
+  srand(time(NULL));
 
-    segment snake[MAX_LENGTH];
-    int snakeLength = 1;
-    snake[0].x = 15;
-    snake[0].y = 30;
+  int appleX, appleY;
+  newApple(&appleX, &appleY);
 
-    int direction = 1; 
-    bool gameOver = false;
+  segment snake[MAX_LENGTH];
+  int snakeLength = 1;
+  snake[0].x = 15;
+  snake[0].y = 30;
 
-    initscr();
-    cbreak();
-    noecho();
-    keypad(stdscr, TRUE);  
-    nodelay(stdscr, TRUE); 
+  int direction = 1; 
+  bool gameOver = false;
 
-    while (!gameOver) {
-        sleep_ms(100);
-        direction = snakeDirection(direction);
-        updateSnakePosition(direction, snake, &snakeLength);
-        if (snake[0].x == BOARD_SIZE - 1 || snake[0].x == 0 || snake[0].y == (BOARD_SIZE * 2) - 1 || snake[0].y == 0)
-            gameOver = true;
+  initscr();
+  cbreak();
+  noecho();
+  keypad(stdscr, TRUE);  
+  nodelay(stdscr, TRUE); 
 
-        for (int i = 1; i < snakeLength; i++) {
-            if (snake[0].x == snake[i].x && snake[0].y == snake[i].y)
-                gameOver = true;
-        }
+  while (!gameOver) {
+    sleep_ms(100);
+    direction = snakeDirection(direction);
+    updateSnakePosition(direction, snake, &snakeLength);
+    checkGameOver(snake, &snakeLength, &gameOver);
 
-        if (snake[0].x == appleY && snake[0].y == appleX) {
-            newApple(&appleX, &appleY);
-            snakeLength++;
-        }
+		if (checkAppleEat(&appleX, &appleY, &snakeLength, snake))
+			newApple(&appleX, &appleY);
 
 
-        gameBoard(appleX, appleY, snake, &snakeLength);
+    gameBoard(appleX, appleY, snake, &snakeLength);
         
-        refresh();
-    }
-    endwin();
+    refresh();
+  }
+  endwin();
 
-    printf("\nGame Over !\n");
-    printf("Your score is : %d\n\n", snakeLength);
-    return 0;
+  printf("\nGame Over !\n");
+  printf("Your score is : %d\n\n", snakeLength);
+	
+  return 0;
 }
