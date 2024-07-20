@@ -80,8 +80,8 @@ void gameBoard(int appleX, int appleY, segment snake[], int *snakeLength)
 
 int newApple(int *appleX, int *appleY)
 {
-  *appleX = rand() % 59;
-  *appleY = rand() % 29;
+  *appleX = rand() % ((BOARD_SIZE * 2) - 2) + 1;
+  *appleY = rand() % (BOARD_SIZE - 2) + 1;
   if (*appleX == 0)
     (*appleX)++;
   else if (*appleY == 0)
@@ -92,6 +92,7 @@ int checkAppleEat(int *appleX, int *appleY, int *snakeLength, segment snake[])
 {
   if (snake[0].x == *appleY && snake[0].y == *appleX)
   {
+    snake[*snakeLength] = snake[*snakeLength - 1];
     (*snakeLength)++;
     return true;
   }
@@ -171,8 +172,8 @@ int main(void)
 
   segment snake[MAX_LENGTH];
   int snakeLength = 1;
-  snake[0].x = 15;
-  snake[0].y = 30;
+  snake[0].x = BOARD_SIZE / 2;
+  snake[0].y = BOARD_SIZE;
 
   int direction = 1;
   bool gameOver = false;
